@@ -1,0 +1,50 @@
+  {% extends 'movies/layout.html' %}  
+
+{% load static %}
+
+{% comment %} {% block head %}
+    <script src="{% static 'movies/grid.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+
+    <h1 style="color: white; width: 70%; margin-top: 90px; margin-left: auto; margin-right: auto;">Movies</h1>
+
+    <div class="grid">
+        {% for movie in movies %}
+            <div class="item">
+                <a href = "{% url 'moviePage' movieName=movie %}"><img src="{{ movie.poster }}" ></a>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}   {% endcomment %}
+
+{% comment %} {% extends 'movies/layout.html' %} {% endcomment %}
+{% comment %} {% load static %} {% endcomment %}
+
+{% block head %}
+    <script src="{% static 'movies/grid.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    <h1 style="color: white; width: 70%; margin-top: 90px; margin-left: auto; margin-right: auto;">
+        {% if type == "movie" %}Movies{% else %}OTT Platforms{% endif %}
+    </h1>
+
+    <div class="grid">
+        {% for item in items %}
+            <div class="item">
+                {% if type == "movie" %}
+                    <a href="{% url 'moviePage' movieName=item.name %}">
+                        <img src="{{ item.poster }}" alt="{{ item.name }}">
+                    </a>
+                {% else %}
+                    <a href="{% url 'ott_page' ott_name=item.name %}">
+                        <img src="{{ item.poster }}" alt="{{ item.name }}">
+                    </a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

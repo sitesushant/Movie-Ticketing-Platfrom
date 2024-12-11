@@ -1,0 +1,248 @@
+  {% extends 'movies/layout.html' %}
+
+
+{% comment %} {% block body %}
+
+    <div id="posterBox">
+        <div id="posterInnerBox">
+            <div class="topInfoLeft">
+                <div class="movieBanner"></div>
+            </div>
+
+            <div class="topInfoRight">
+                <h1> {{ movie.name }}</h1>
+            </div>
+        </div>
+    </div>
+
+    <div id="movieContainer">
+        <div class="movieInfoLeft">
+            <div class="movieBanner">
+                <img src="{{ movie.poster }}">
+            </div>
+        </div>
+
+        <div class="movieInfoRight">
+            <h2>Synopsis</h2>
+            <p>{{ movie.about }}</p>
+
+            <form id="bookTicketPage" action="{% url 'book_seat' movieName=movie %}" method="GET">
+                <button type="submit" form="bookTicketPage" id="selectHall">Book Seats</button>
+            </form>
+
+        </div>
+        
+{% endblock %}   {% endcomment %}
+
+{% comment %} {% extends 'movies/layout.html' %} {% endcomment %}
+
+{% block body %}
+
+<div id="posterBox">
+    <div id="posterInnerBox">
+        <div class="topInfoLeft">
+            <div class="mediaBanner"></div>
+        </div>
+
+        <div class="topInfoRight">
+            <h1>{{ item.name }}</h1>
+        </div>
+    </div>
+</div>
+
+<div id="mediaContainer">
+    <div class="mediaInfoLeft">
+        <div class="mediaBanner">
+            <img src="{{ item.poster }}" alt="{{ item.name }}">
+        </div>
+    </div>
+
+    <div class="mediaInfoRight">
+        <h2>Synopsis</h2>
+        <p>{{ item.about }}</p>
+
+        
+        {% if type == "movie" %}
+        <form id="bookTicketPage" action="{% url 'book_seat' movieName=item.name %}" method="GET">
+            <button type="submit" form="bookTicketPage" id="selectHall">Book Seats</button>
+        {% else %}
+        <p  id="rate" style="
+        color: red; 
+        background-color: white; 
+        padding: 10px 20px; 
+        border-radius: 30px; 
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3); 
+        display: inline-block; 
+        transition: transform 0.3s, box-shadow 0.3s;" 
+        onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0px 6px 20px rgba(0, 0, 0, 0.4)';" 
+        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 4px 15px rgba(0, 0, 0, 0.3)';">
+        Rs.{{ item.rate }}
+        </p>
+        <form id="bookTicketPage" action="" method="GET">
+                <button type="submit" form="bookTicketPage" id="selectHall">Buy Now</button>
+                <div id="paypal-button-container-2"></div>
+            </form>  
+        {% endif %}
+         
+         
+
+    </div>
+</div>
+{% comment %} <script src="https://www.paypal.com/sdk/js?client-id=ASYFte-gKjuml0sQk-u1dfhiPJNaA5DINcvd7txuTP3N9YE3Ol1pq1iOEYZjpj8mMe7YnfY5mxAMUJ7i&currency=USD"></script>
+<script>
+    const movieUrl =  {{ item.url }}; // Replace with your movie URL
+
+    document.getElementById('bookTicketPage').addEventListener('submit', function(event) {
+         event.preventDefault();
+        // Initialize the PayPal transaction when the button is clicked
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: {{ item.rate }} // Replace with the actual price
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Payment was successful
+                    alert('Transaction completed by ' + details.payer.name.given_name);
+                    window.location.href = movieUrl; // Redirect to the movie URL
+                });
+            },
+            onCancel: function() {
+                alert('Payment was cancelled.');
+            },
+            onError: function(err) {
+                console.error('An error occurred during the transaction', err);
+                alert('An error occurred. Please try again.');
+            }
+        }).render('paypal-button-container'); // Render the PayPal Button dynamically (invisible)
+    });
+</script> {% endcomment %}
+    
+{% comment %} <script src="https://www.paypal.com/sdk/js?client-id=ASYFte-gKjuml0sQk-u1dfhiPJNaA5DINcvd7txuTP3N9YE3Ol1pq1iOEYZjpj8mMe7YnfY5mxAMUJ7i&currency=USD"></script>
+
+    <script>
+        const movieUrl =  {{item.url}}; // Replace with your movie URL
+       paypal.Buttons({
+            // Configure the createOrder function
+           createOrder: async function (data, actions) {
+               const totalCost = parseFloat(
+                   document.getElementById('rate').innerText.split(':')[1]
+                        .trim()
+                        .replace('Rs/-', '')
+                        .replace(',', '')
+                );
+    
+                // Create an order with PayPal
+                return actions.order.create({
+                    purchase_units: [
+                        {
+                            amount: {
+                                value:{{ item.rate }},
+                            },
+                        },
+                    ],
+                });
+            },
+            // Configure the onApprove function
+            onApprove: function (data, actions) {
+                // Capture the funds from the transaction
+                return actions.order.capture().then(async function (details) {
+                    // Show a success message to the user
+                    alert(`Transaction completed by ${details.payer.name.given_name}`);
+    
+                    // Fetch the ticket information by sending the order details to your backend
+                    const response = await fetch('/tickets', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            transactionId: details.id,
+                            payerName: details.payer.name.given_name,
+                            // Include other details if necessary
+                        }),
+                    });
+                        
+                    if (response.ok) {
+                        // Redirect to the ticket section
+                        window.location.href = 'movieUrl '; // Adjust URL based on your ticket page
+                              
+                    } else {
+                        console.error('Failed to generate ticket.');
+                    }
+                     
+                });
+
+            },
+            onError: function (err) {
+                console.error('PayPal Button Error:', err);
+            },
+        }).render('#paypal-button-container-2');
+    </script>  
+  {% endcomment %}
+
+<script src="https://www.paypal.com/sdk/js?client-id=AQvXZ0rmCm5nd0EjhUcwyR5qZNXCyPAvJ8mY0i-LimMTVpjWqa45zpmYFBDzYkhHkaJDirLP9QTvM5BU&currency=USD"></script>
+
+  <script>
+    const csrfToken = "{{ csrf_token }}";
+      const movieUrl = "{{ item.url }}"; // Ensure this is a valid URL string
+  
+      paypal.Buttons({
+          // Configure the createOrder function
+          createOrder: function (data, actions) {
+              return actions.order.create({
+                  purchase_units: [
+                      {
+                          amount: {
+                              value: "{{ item.rate }}", // Use the actual price dynamically
+                          },
+                      },
+                  ],
+              });
+          },
+  
+          // Configure the onApprove function
+          onApprove: function (data, actions) {
+              return actions.order.capture().then(async function (details) {
+                  alert(`Transaction completed by ${details.payer.name.given_name}`);
+                  
+                  try {
+                      const response = await fetch('/tickets', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'X-CSRFToken': csrfToken,
+                          },
+                          body: JSON.stringify({
+                              transactionId: details.id,
+                              payerName: details.payer.name.given_name,
+                          }),
+                      });
+  
+                      if (response.ok) {
+                          window.location.href = movieUrl; // Redirect to movie URL
+                            } else {
+                                throw new Error('Failed to generate ticket.');
+                            }
+                                } catch (error) {
+                                    console.error(error);
+                                        alert("There was an issue processing your ticket. Please contact support.");
+                    }
+                });
+            },
+  
+          // Error Handling
+            onError: function (err) {
+                console.error('PayPal Button Error:', err);
+                alert("An error occurred during the payment process. Please try again.");
+            },
+        }).render('#paypal-button-container-2'); // Render PayPal button in the correct container
+</script>
+  
+
+{% endblock %}
