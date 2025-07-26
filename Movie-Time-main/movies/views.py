@@ -1,17 +1,27 @@
+ 
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, redirect
+from django.http import FileResponse, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+import barcode
+from barcode.writer import ImageWriter
+from django.conf import settings
+from pathlib import Path
 from .models import User, City, Theatre, Hall, Movie, Show, Ticket,OTT
 from datetime import datetime, timedelta
 from django.utils.timezone import now, localtime
 import random
 import json
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.pdfgen import canvas
+from django.core.files.storage import FileSystemStorage
 
 # Create your views here.
 
@@ -189,6 +199,7 @@ def seats(request, show):
 @csrf_exempt
 def ticket(request):
     if request.method == 'POST':
+         
         data = json.loads(request.body)
         
         current_show = Show.objects.get(pk=data.get("show"))
@@ -206,9 +217,29 @@ def ticket(request):
 
         cost = len(data.get("seatList")) * current_show.rate
 
-        Ticket.objects.create(user=request.user, seat={'seatList':data.get("seatList")}, show=current_show, cost=cost)
-
+        ticket_obj=Ticket.objects.create(user=request.user, seat={'seatList':data.get("seatList")}, show=current_show, cost=cost)
+         # Barcode generation
+        barcode_data = f"TICKET-{ticket_obj.id}"  # Unique barcode data (e.g., ticket ID)
+        barcode_class = barcode.get_barcode_class('code128')
+        barcode_image = barcode_class(barcode_data, writer=ImageWriter()) 
+        # Define the path to save the barcode image
+        barcode_folder = Path(settings.MEDIA_ROOT) / "barcodes"
+        barcode_folder.mkdir(parents=True, exist_ok=True)
+        barcode_path = barcode_folder / f"barcode_{ticket_obj.id}.png"
+        
+        
+         # Save the barcode image
+        barcode_image.save(str(barcode_path))
+        
+         # Save the barcode URL in the ticket object or pass it to the context if needed
+        ticket_obj.barcode_url = f"{settings.MEDIA_URL}barcodes/barcode_{ticket_obj.id}.png"
+        ticket_obj.save()
+        
+        
         return JsonResponse({"message": "Ticket Created Successfully"}, status=201)
+
+ 
+    
 
 def allTickets(request):
 
@@ -288,3 +319,49 @@ def error_page(request):
     Renders a generic error page.
     """
     return render(request, "movies/error.html")  
+
+
+def view_ticket(request, ticket_id):
+    """
+    View a user's ticket, including the barcode.
+    """
+    ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
+    
+    # Path to the barcode image
+    barcode_url = ticket.barcode_url
+
+    context = {
+        'ticket': ticket,
+        'barcode_url': barcode_url,
+    }
+
+    return render(request, "movies/view_ticket.html", context)
+
+def download_ticket(request, ticket_id):
+    """
+    Download the ticket as a PDF with barcode.
+    """
+    ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
+    
+    # Path to save the PDF file
+    pdf_filename = f"Ticket_{ticket.id}.pdf"
+    pdf_path = Path(settings.MEDIA_ROOT) / pdf_filename
+    
+    # Create the PDF
+    c = canvas.Canvas(str(pdf_path), pagesize=letter)
+    c.drawString(100, 750, f"Ticket ID: {ticket.id}")
+    c.drawString(100, 730, f"Movie: {ticket.show.movie.name}")
+    c.drawString(100, 710, f"Showtime: {ticket.show.date} at {ticket.show.time}")
+    c.drawString(100, 690, f"Seats: {ticket.seat}")
+    c.drawString(100, 670, f"Cost: ${ticket.cost}")
+    
+    # Add barcode image to PDF
+    barcode_image_path = Path(settings.MEDIA_ROOT) / ticket.barcode_url.split(settings.MEDIA_URL)[1]
+    c.drawImage(str(barcode_image_path), 100, 500, width=200, height=100)
+    
+    c.save()
+
+    # Return the PDF as a downloadable file
+    return FileResponse(open(str(pdf_path), 'rb'), as_attachment=True, filename=pdf_filename)
+
+ 

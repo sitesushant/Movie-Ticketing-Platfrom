@@ -183,8 +183,10 @@
                 <div id="paypal-button-container"></div>
                 
             <div>
-                <form id="bookTicketDiv" action="{% url 'allTickets' %}">
-                   <button form="bookTicketDiv" type="submit" id = "processRequest" disabled> Ticket Here </button>
+                <form id="bookTicketDiv" action="{% url 'allTickets' %}" >
+                     
+
+                   <button form="bookTicketDiv" type="submit" id = "processRequest" disabled style="display: none;" > Ticket Here </button>
                </form>  
                 
             
@@ -192,50 +194,11 @@
     </div>
     
 </div>
-
-    
-{% comment %} <script src="https://www.paypal.com/sdk/js?client-id=ASYFte-gKjuml0sQk-u1dfhiPJNaA5DINcvd7txuTP3N9YE3Ol1pq1iOEYZjpj8mMe7YnfY5mxAMUJ7i&currency=USD"></script> 
-  {% endcomment %}
- 
-     
-{% comment %} <script>
-    paypal.Buttons({
-        // Configure the createOrder function
-        createOrder: async function (data, actions) {
-            // Get the total cost dynamically
-            const totalCost = parseFloat(document.getElementById('total_cost').innerText.split(':')[1].trim().replace('Rs/-', '').replace(',', ''));
-
-    
-            // Create an order with PayPal
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: totalCost, // The total cost for the order
-                    }
-                }]
-            });
-        },
-        // Configure the onApprove function
-        onApprove: function (data, actions) {
-            // Capture the funds from the transaction
-            return actions.order.capture().then(function (details) {
-                // Show a success message to the user
-                alert(`Transaction completed by ${details.payer.name.given_name}`);
-                window.location.href = '/tickets';
-            });
-        },
-        onError: function (err) {
-            console.error('PayPal Button Error:', err);
-        }
-    }).render('#paypal-button-container'); // Render the PayPal button
-    
-</script> {% endcomment %}
-  
-
-                
-    <script src="https://www.paypal.com/sdk/js?client-id=ASYFte-gKjuml0sQk-u1dfhiPJNaA5DINcvd7txuTP3N9YE3Ol1pq1iOEYZjpj8mMe7YnfY5mxAMUJ7i&currency=USD"></script>
+       
+<script src="https://www.paypal.com/sdk/js?client-id=ASYFte-gKjuml0sQk-u1dfhiPJNaA5DINcvd7txuTP3N9YE3Ol1pq1iOEYZjpj8mMe7YnfY5mxAMUJ7i&currency=USD"></script>
 
     <script>
+        const csrfToken = "{{ csrf_token }}";  
        paypal.Buttons({
             // Configure the createOrder function
            createOrder: async function (data, actions) {
@@ -257,8 +220,7 @@
                     ],
                 });
             },
-            // Configure the onApprove function
-            onApprove: function (data, actions) {
+             onApprove: function (data, actions) {
                 // Capture the funds from the transaction
                 return actions.order.capture().then(async function (details) {
                     // Show a success message to the user
@@ -269,6 +231,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken,
                         },
                         body: JSON.stringify({
                             transactionId: details.id,
@@ -278,8 +241,12 @@
                     });
                         
                     if (response.ok) {
+                        const ticketButton = document.getElementById('processRequest');
+                        ticketButton.disabled = false; // Enable the button
+                        ticketButton.style.display = 'block';
+                        ticketButton.style.left = '50%';
                         // Redirect to the ticket section
-                        window.location.href = ' '; // Adjust URL based on your ticket page
+                        // Adjust URL based on your ticket page
                               
                     } else {
                         console.error('Failed to generate ticket.');
@@ -290,79 +257,13 @@
             },
             onError: function (err) {
                 console.error('PayPal Button Error:', err);
-            },
-        }).render('#paypal-button-container');
+            },           
+
+    }).render('#paypal-button-container');
     </script>  
  
-    {% comment %} <script>
-        
-        const csrfToken = "{{ csrf_token }}";
-        paypal.Buttons({
-            createOrder: async function (data, actions) {
-                try {
-                    const costElement = document.getElementById('total_cost');
-                    if (!costElement) throw new Error("Cost element not found.");
-
-                    const totalCost = parseFloat(
-                        costElement.innerText.split(':')[1]
-                        .trim()
-                        .replace('Rs/-', '')
-                        .replace(',', '')
-                    );
-
-                    if (isNaN(totalCost)) throw new Error("Invalid cost format.");
-
-                    return actions.order.create({
-                        purchase_units: [
-                            {
-                                    amount: {
-                                    value: totalCost.toFixed(2),
-                                },
-                            },
-                        ],
-                    });
-                } catch (error) {
-                    console.error("Error creating order:", error);
-                    alert("Unable to create order. Please try again.");
-                    return null;
-                }
-            },
-            onApprove: function (data, actions) {
-                return actions.order.capture().then(async function (details) {
-                    alert(`Transaction completed by ${details.payer.name.given_name}`);
-                
-                    try {
-                        const response = await fetch('/tickets', {
-                            method:'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': csrfToken,
-                            },
-                             body:JSON.stringify({
-                                transactionId: details.id,
-                                payerName: details.payer.name.given_name,
-                            // Include other details if necessary
-                            }),
-                        });
-
-                        if (response.ok) {
-                            window.location.href = '/your-ticket-page'; // Replace with your actual URL
-                        } else {
-                            throw new Error("Failed to generate ticket.");
-                        }
-                    } catch (error) {
-                        console.error(error);
-                        alert("There was an issue processing your ticket. Please contact support.");
-                    }
-                });
-            },
-            onError: function (err) {
-                console.error('PayPal Button Error:', err);
-                alert("An error occurred with PayPal. Please try again later.");
-            },
-        }).render('#paypal-button-container');
-    </script>   
-     {% endcomment %}
-    
+     
     
     {% endblock %}
+
+     

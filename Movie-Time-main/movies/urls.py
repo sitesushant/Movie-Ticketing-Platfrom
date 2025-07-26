@@ -16,14 +16,16 @@ urlpatterns = [
     path('ticket', views.ticket, name="ticket"),
     path('tickets', views.allTickets, name="allTickets"),
     path('movies', views.allMovies, name="allMovies"),
-    
     path('search/<str:query>/<str:model_type>/', views.search_results, name='search_results'),
-   
     path('ott/<str:ott_name>/', views.ott_page, name='ott_page'),
     path('ott/', views.ott_view, name='ott_view'),
     path('error/', views.error_page, name='error_page'),
+    path('ticket/view/<int:ticket_id>/', views.view_ticket, name='view_ticket'),
+    path('ticket/download/<int:ticket_id>/', views.download_ticket, name='download_ticket'),
+     
+     
 ]
-""" path('OTT/', views.OTTView, name="allOTT"),
-    path('ott/<str:OTTName>/', views.OTTPage, name="OTTPage"),
-    path('results/<str:query>/', views.results, name="results"), """ 
-""" path('movie/<str:movie_name>/', views.movie_page, name='movie_page'), """ 
+
+ 
+
+ 

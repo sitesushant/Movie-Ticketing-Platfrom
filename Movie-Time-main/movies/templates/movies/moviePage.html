@@ -63,8 +63,41 @@
 
         
         {% if type == "movie" %}
+        
+            <button id="watchTrailerButton"   style="
+               
+            background-color: #ff4500; 
+            color: white; 
+            border: none; 
+            padding: 10px 10px;
+            font-size: 16px; 
+            border-radius: 30px; 
+            cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+            transition: background-color 0.3s ease; 
+            display: inline-block; 
+            
+            margin-top: 10px;"
+            onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0px 6px 20px rgba(0, 0, 0, 0.4)';" 
+            onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 4px 15px rgba(0, 0, 0, 0.3)';">
+            Watch Trailer
+        </button>
+        
+        <script>
+            document.getElementById('watchTrailerButton').addEventListener('click', () => {
+                const trailerUrl = "{{ item.trailer_url }}";
+                console.log("Button clicked! Redirecting to:", trailerUrl);
+                window.location.href = trailerUrl;
+            });
+        </script>
+        
         <form id="bookTicketPage" action="{% url 'book_seat' movieName=item.name %}" method="GET">
             <button type="submit" form="bookTicketPage" id="selectHall">Book Seats</button>
+        </form>   
+        
+          
+     
+
         {% else %}
         <p  id="rate" style="
         color: red; 
@@ -78,9 +111,51 @@
         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 4px 15px rgba(0, 0, 0, 0.3)';">
         Rs.{{ item.rate }}
         </p>
+        <button style="
+        background-color: #ff4500; 
+        color: white; 
+        border: none; 
+        padding: 10px 20px; 
+        font-size: 16px; 
+        border-radius: 30px; 
+        cursor: pointer; 
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+        transition: background-color 0.3s ease;"
+        onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0px 6px 20px rgba(0, 0, 0, 0.4)';" 
+        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 4px 15px rgba(0, 0, 0, 0.3)';">
+        Watch Trailer
+        </button>
+
+         <script>
+        // Optional: Add a click event listener for the button
+        document.querySelector('button').addEventListener('click', () => {
+            window.location.href = "{{item.trailerurl}}";
+            
+    
+            // Replace the alert with the actual action, e.g., window.location.href = "trailer-url";
+        });
+        </script>
         <form id="bookTicketPage" action="" method="GET">
-                <button type="submit" form="bookTicketPage" id="selectHall">Buy Now</button>
-                <div id="paypal-button-container-2"></div>
+                {% comment %} <button type="submit" form="bookTicketPage" id="selectHall">Buy Now</button> {% endcomment %}
+                <div id="paypal-button-container-2" 
+                style="
+                    width: 200px; 
+                    height: 40px; 
+                    background-color: #0070ba; 
+                    border-radius: 20px; 
+                    display: flex; 
+                    justify-content: center;  
+                    color: white; 
+                    font-family: Arial, sans-serif; 
+                    font-size: 14px; 
+                    font-weight: bold; 
+                    cursor: pointer; 
+                    text-transform: uppercase; 
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+                    transition: background-color 0.3s ease;
+                " 
+                onmouseover="this.style.backgroundColor='#005ea6'" 
+                onmouseout="this.style.backgroundColor='#0070ba'"></div>
             </form>  
         {% endif %}
          
@@ -190,7 +265,7 @@
 
   <script>
     const csrfToken = "{{ csrf_token }}";
-      const movieUrl = "{{ item.url }}"; // Ensure this is a valid URL string
+      const movieUrl = "{{ item.movieurl }}"; // Ensure this is a valid URL string
   
       paypal.Buttons({
           // Configure the createOrder function
@@ -239,7 +314,7 @@
           // Error Handling
             onError: function (err) {
                 console.error('PayPal Button Error:', err);
-                alert("An error occurred during the payment process. Please try again.");
+                 
             },
         }).render('#paypal-button-container-2'); // Render PayPal button in the correct container
 </script>

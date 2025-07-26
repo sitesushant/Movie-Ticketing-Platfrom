@@ -1,6 +1,7 @@
 {% extends 'movies/layout.html' %}
 
 {% block body %}
+ 
 
     <h2 style="color: white;margin-top: 90px;margin-left: auto;margin-right: auto; width: 70%;">Upcoming Bookings</h2>
 
@@ -49,6 +50,15 @@
                                     <ul>
                                         <li><span class="bold">Time:</span> {{ ticket.show.get_time_display }}</li>
                                         <li><span class="bold">Date:</span> {{ ticket.show.date }}</li>
+                                        <li>
+                                            <span class="bold">Barcode:</span>
+                                            <img src="https://img.freepik.com/free-psd/barcode-illustration-isolated_23-2150584086.jpg" style="width: 200px; height: 100px; object-fit: contain;" alt="Barcode">
+
+                                            {% comment %} <img src="{{ barcode_url }}" alt="Ticket Barcode">
+                                            <img src=" " alt="Ticket Barcode"> {% endcomment %}
+                                        </li> 
+                                        {% comment %} <a href="{% url 'download_ticket' ticket.id %}" class="btn btn-success" style="padding: 10px 20px; background-color: green; color: white; text-decoration: none; border-radius: 5px;">Download Ticket</a>
+                                     {% endcomment %}
                                     </ul>
                                 </div>
                             </div>
@@ -104,6 +114,14 @@
                                         <ul>
                                             <li><span class="bold">Time:</span> {{ ticket.show.get_time_display }}</li>
                                             <li><span class="bold">Date:</span> {{ ticket.show.date }}</li>
+                                            <li>
+                                                <span class="bold">Barcode:</span>
+                                                <img src="https://img.freepik.com/free-psd/barcode-illustration-isolated_23-2150584086.jpg" style="width: 200px; height: 100px; object-fit: contain;" alt="Barcode">
+
+                                                {% comment %} <img src="{{ barcode_url }}" alt="Ticket Barcode"> {% endcomment %}
+                                            </li> 
+                                            {% comment %} <a href="{% url 'download_ticket' ticket.id %}" class="btn btn-success" style="padding: 10px 20px; background-color: green; color: white; text-decoration: none; border-radius: 5px;">Download Ticket</a>
+                                         {% endcomment %}
                                         </ul>
                                     </div>
                                 </div>
@@ -191,6 +209,15 @@
                                         <ul>
                                             <li><span class="bold">Time:</span> {{ ticket.show.get_time_display }}</li>
                                             <li><span class="bold">Date:</span> {{ ticket.show.date }}</li>
+                                            <li>
+                                                <span class="bold">Barcode:</span>
+                                                {% comment %} 
+                                                <img src="{{ barcode_url }}" alt="Ticket Barcode"> {% endcomment %}
+                                                <img src="https://img.freepik.com/free-psd/barcode-illustration-isolated_23-2150584086.jpg" style="width: 200px; height: 100px; object-fit: contain;" alt="Barcode">
+
+                                            {% comment %} </li> 
+                                            <a href="{% url 'download_ticket' ticket.id %}" class="btn btn-success" style="padding: 10px 20px; background-color: green; color: white; text-decoration: none; border-radius: 5px;">Download Ticket</a> {% endcomment %}
+                                        
                                         </ul>
                                     </div>
                                 </div>
@@ -247,9 +274,15 @@
                                     <ul>
                                         <li><span class="bold">Time:</span> {{ ticket.show.get_time_display }}</li>
                                         <li><span class="bold">Date:</span> {{ ticket.show.date }}</li>
-                                        <img src = " D:\Movie-Time-main\Movie-Time-main\movies\static\movies\360_F_255979498_vewTRAL5en9T0VBNQlaDBoXHlCvJzpDl.jpg "
-                                        height = "20" width = "100" />
-                                    </ul>
+                                        <li>
+                                            <span class="bold">Barcode:</span>
+                                            
+                                           {% comment %}  <img src="{{ barcode_url }}" alt="Ticket Barcode"> {% endcomment %}
+                                           <img src="https://img.freepik.com/free-psd/barcode-illustration-isolated_23-2150584086.jpg" style="width: 200px; height: 100px; object-fit: contain;" alt="Barcode">
+
+                                        </li> 
+                                        {% comment %} <a href="{% url 'download_ticket' ticket.id %}" class="btn btn-success" style="padding: 10px 20px; background-color: green; color: white; text-decoration: none; border-radius: 5px;">Download Ticket</a>
+                                    {% endcomment %} </ul>
                                 </div>
                                  
                                  

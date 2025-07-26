@@ -44,6 +44,7 @@ class Movie(models.Model):
     name = models.CharField(max_length=30)
     poster = models.URLField(max_length=500)
     about = models.CharField(max_length=500)
+    trailer_url = models.URLField(default="https://default-url.com")
 
     def __str__(self):
         return f"{self.name}"
@@ -119,7 +120,8 @@ class Ticket(models.Model):
     seat = models.JSONField()
     show = models.ForeignKey(Show, on_delete=models.CASCADE)
     cost = models.IntegerField()
-
+    barcode_url = models.URLField(null=True, blank=True)
+    barcode_data = models.CharField(max_length=255, blank=True, null=True)
     def __str__(self):
         return f"[{self.user}] - {self.seat} - {self.show}"
 
@@ -136,7 +138,8 @@ class OTT(models.Model):
     poster = models.URLField(max_length=500)
     about = models.CharField(max_length=500)
     rate = models.IntegerField()
-    url = models.URLField(default="https://default-url.com")
+    movieurl = models.URLField(default="https://default-url.com")
+    trailerurl = models.URLField(default="https://default-url.com")
     def __str__(self):
         return f"{self.name}"
     def serialize(self):

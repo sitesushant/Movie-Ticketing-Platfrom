@@ -722,12 +722,16 @@ section .wave:after {
     padding: 1em 2em;
     color: #fff;
     border: 0;
+    margin-right: 20px;
     margin-top: 20px;
+    display: inline-block;
 }
 
 #selectHall:hover {
     background: #333;
 }
+
+ 
 
 #hallForm {
     width: fit-content;
